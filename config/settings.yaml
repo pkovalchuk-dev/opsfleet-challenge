@@ -1,0 +1,14 @@
+# Presentation settings. The company block is the default (edited by the CEO
+# in production); a user block overrides it key by key. Free-text instructions
+# are presentation guidance only; access and safety rules live in code.
+company:
+  format: "a short narrative followed by a table for the numbers"
+  depth: standard
+  language: en
+  instructions: >-
+    Lead with the headline figure. Be direct and concise. State the metric
+    definition and the date window once. Flag data caveats in one line.
+users:
+  manager_b:
+    format: "bullet points, with a small table only when comparing periods"
+    depth: brief

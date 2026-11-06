@@ -1,0 +1,19 @@
+# Access table for the prototype. The dataset has no executives, so this file
+# supplies the manager-to-brand mapping the client asked for. Brand strings
+# must match products.brand exactly (see config/brands.json).
+users:
+  manager_a:
+    name: Manager A
+    email: manager.a@example.com
+    role: manager
+    brands: ["Seven7", "Calvin Klein"]
+  manager_b:
+    name: Manager B
+    email: manager.b@example.com
+    role: manager
+    brands: ["Carhartt"]
+  ceo:
+    name: CEO
+    email: ceo@example.com
+    role: ceo
+    brands: []

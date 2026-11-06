@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1980" height="1370" viewBox="0 0 1980 1370" role="img" aria-labelledby="title desc">
+<title id="title">Retail analysis assistant — production architecture</title>
+<desc id="desc">The web client passes chat, settings and feedback through a separate Google IAP service. One Identity and access box represents public-key caching and refresh, per-request JWT validation, loading the user row and checking chat ownership; the technical explanation details these internal steps. Authenticated requests pass identity and access checks before context assembly loads shared system lessons before private user memory, settings and permitted history. Fixed access, safety, schema and metric rules stay above learned context. LangGraph routes intent before its retrieve_examples node calls the Context retrieval module with the focused question and trusted user and brand scope. The module combines keyword and vector search over knowledge.examples, applies brand filters and ranks approved Golden examples. It returns up to three permitted question, SQL and explanation examples with provenance. SQL always uses the query validation node. The query node enforces current brand scope, approved fields, SQL validation and execution limits. BigQuery returns scoped results and job statistics directly to the LangGraph agent. After finish_plan, two independent reflection calls run in parallel. reflect_user extracts private preferences and lessons from the user exchange. reflect_system extracts general system lessons from sanitized tool and repair outcomes without private content. Python validates and saves user-owned memory and ownerless system lessons in app.memory. Context assembly loads shared lessons as high-priority guidance on the next request, below fixed rules and ahead of personal memory and history. One Cloud SQL PostgreSQL instance and database stores two schemas: app for users, owner-scoped conversations, reports, settings, private user memory and shared system lessons without embeddings, feedback and checkpoints; knowledge for Golden examples. Each deployment serves one company. The admin-maintained app.users row holds id, email, role and brands: managers have explicit brand strings; a CEO has an empty brands list and can access all brands. Cloud Storage events trigger a Cloud Run ingestion worker that writes Golden examples to knowledge.examples. Authenticated client feedback is stored in app.feedback in Cloud SQL with its turn and trace id; reviewers receive only owner-approved, sanitized cases for evaluation in LangSmith, with no access to raw private conversations. LangSmith holds separate versioned eval datasets and experiments. An isolated evaluation runner supplies scores to a CI release gate. Cloud Logging supplies content-free timing and count events; Cloud Monitoring charts latency, throughput and alerts. LangSmith captures sanitized step traces, and Secret Manager supplies credentials. Generation calls go through Vercel AI Gateway, which routes to Gemini and can route to other providers; embeddings call Gemini directly. After saving a turn, the assistant backend schedules conversation summarization through Cloud Tasks using only conversation and coverage IDs. An authenticated task invokes the Conversation summary handler outside LangGraph. Python checks the current private history and coverage version, calls the existing AI Gateway with permitted older turns and the previous summary, then saves the checked summary and covered-through turn atomically in app.conversations. Future actions extend the plan through approved Python handlers or LangGraph nodes. The agent sends action names and inputs to future chart, email and web search capabilities. Python validates current permissions and inputs before execution. Email requires checks and confirmation before sending.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M1 1L7 4L1 7Z" fill="#64748b"/></marker></defs>
+<style>text{font-family:Arial,Helvetica,sans-serif;fill:#202d3d}</style>
+<rect width="1980" height="1370" fill="white"/>
+<g transform="translate(0,-70)">
+
+<text x="150" y="120" font-size="15" font-weight="700" text-anchor="middle" style="fill:#536174">CLIENT</text>
+<rect x="375" y="280" width="1265" height="530" fill="#f8fafc" stroke="#a3afbd" stroke-width="1.4" stroke-dasharray="1 5" stroke-linecap="round"/>
+<text x="1400" y="310" font-size="16" font-weight="700" text-anchor="start" style="fill:#536174">BACKEND · Cloud Run</text>
+<rect x="40" y="1140" width="560" height="230" fill="#f8fafc" stroke="#a3afbd" stroke-width="1.4" stroke-dasharray="6 5"/>
+<text x="65" y="1170" font-size="16" font-weight="700" text-anchor="start" style="fill:#536174">OPERATIONS</text>
+<rect x="800" y="1140" width="1130" height="230" fill="#f8fafc" stroke="#a3afbd" stroke-width="1.4" stroke-dasharray="6 5"/>
+<text x="825" y="1170" font-size="16" font-weight="700" text-anchor="start" style="fill:#536174">KNOWLEDGE INGESTION</text>
+<path d="M260 200H400" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="330" y="161" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">Chat / settings →</text>
+<text x="330" y="181" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">Feedback + ID →</text>
+<text x="330" y="230" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">← Checked reply</text>
+<path d="M530 260V390" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="550" y="311" font-size="15" font-weight="400" text-anchor="start" style="fill:#536174">Request + signed</text>
+<text x="550" y="333" font-size="15" font-weight="400" text-anchor="start" style="fill:#536174">IAP assertion ↓</text>
+<text x="700" y="400" font-size="13" font-weight="400" text-anchor="middle" style="fill:#536174">Verified actor →</text>
+<text x="700" y="420" font-size="13" font-weight="400" text-anchor="middle" style="fill:#536174">Request + brands →</text>
+<text x="700" y="460" font-size="13" font-weight="400" text-anchor="middle" style="fill:#536174">← Checked reply</text>
+<path d="M1000 435H1180" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="1090" y="418" font-size="15" font-weight="400" text-anchor="middle" style="fill:#536174">Prioritized context →</text>
+<text x="1090" y="460" font-size="15" font-weight="400" text-anchor="middle" style="fill:#536174">← Checked result</text>
+<path d="M1400 435H1660" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="1530" y="418" font-size="15" font-weight="400" text-anchor="middle" style="fill:#536174">Policy-checked SQL →</text>
+<text x="1530" y="460" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">← Scoped rows + job stats</text>
+<path d="M1290 390V210" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="1310" y="245" font-size="16" font-weight="700" text-anchor="start" style="fill:#536174">Permitted node inputs ↑</text>
+<text x="1310" y="269" font-size="16" font-weight="400" text-anchor="start" style="fill:#536174">↓ Intent / SQL / answer</text>
+<path d="M890 200V300" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="865" y="226" font-size="13" font-weight="400" text-anchor="end" style="fill:#536174">IDs + coverage ↑</text>
+<text x="915" y="226" font-size="13" font-weight="400" text-anchor="start" style="fill:#536174">Authenticated task ↓</text>
+<path d="M1020 330H1100V160H1180" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="1060" y="350" font-size="13" font-weight="400" text-anchor="start" style="fill:#536174">Older turns + summary ↑</text>
+<text x="1060" y="370" font-size="13" font-weight="400" text-anchor="start" style="fill:#536174">↓ Updated summary</text>
+<path d="M775 360V925" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="755" y="750" font-size="14" font-weight="400" text-anchor="end" style="fill:#536174">Private history ↑</text>
+<text x="755" y="774" font-size="14" font-weight="400" text-anchor="end" style="fill:#536174">Summary + coverage + version ↓</text>
+<path d="M1290 480V620" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="1270" y="540" font-size="14" font-weight="400" text-anchor="end" style="fill:#536174">Focused question ↓</text>
+<text x="1270" y="562" font-size="14" font-weight="400" text-anchor="end" style="fill:#536174">Trusted user + brands</text>
+<text x="1310" y="540" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">↑ Up to 3 permitted</text>
+<text x="1310" y="562" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">examples + source</text>
+<text x="1310" y="584" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">Question · SQL · explanation</text>
+<path d="M1400 670H1660" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="1530" y="651" font-size="15" font-weight="400" text-anchor="middle" style="fill:#536174">Focused question →</text>
+<text x="1530" y="695" font-size="15" font-weight="400" text-anchor="middle" style="fill:#536174">← Vector</text>
+<path d="M1290 720V925" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="1310" y="780" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">Search knowledge.examples ↓</text>
+<text x="1310" y="804" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">↑ Golden examples</text>
+<text x="1310" y="828" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">Brand-filtered</text>
+<path d="M1185 480V505H1030V925" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="1100" y="493" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">Learning</text>
+<text x="1050" y="858" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">User memory + system lessons ↓</text>
+<text x="1050" y="880" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">app.memory: private + shared</text>
+<path d="M890 925V480" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="1020" y="740" font-size="13" font-weight="400" text-anchor="end" style="fill:#536174">History + summary ↑</text>
+<text x="1020" y="762" font-size="13" font-weight="400" text-anchor="end" style="fill:#536174">System + user memory</text>
+<path d="M680 810V925" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<text x="660" y="852" font-size="14" font-weight="400" text-anchor="end" style="fill:#536174">app: owner-scoped state ↕</text>
+<text x="660" y="874" font-size="14" font-weight="400" text-anchor="end" style="fill:#536174">app.users: role + brands ↑</text>
+<path d="M375 760H355V1125H230V1140" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="390" y="805" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">Timings + counts / credentials</text>
+<path d="M1090 1230H1160" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="1125" y="1214" font-size="13" font-weight="400" text-anchor="middle" style="fill:#536174">Event</text>
+<path d="M1400 1230H1650" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="1525" y="1213" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">Object version →</text>
+<path d="M1775 1210V1110H1330V1095" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="1640" y="1097" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">knowledge.examples: golden</text>
+<path d="M800 1305H600" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="700" y="1278" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">← Telemetry</text>
+<text x="700" y="1333" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">Credentials →</text>
+<rect x="40" y="140" width="220" height="120" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="150.0" y="208.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Web client</text>
+<rect x="400" y="140" width="260" height="120" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="530.0" y="208.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Google IAP</text>
+<rect x="420" y="390" width="220" height="130" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="530" y="420" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Identity &amp; access</text>
+<text x="530" y="448" font-size="17" font-weight="400" text-anchor="middle" style="fill:#536174">Verify token ·</text>
+<text x="530" y="471" font-size="17" font-weight="400" text-anchor="middle" style="fill:#536174">load user row ·</text>
+<text x="530" y="494" font-size="17" font-weight="400" text-anchor="middle" style="fill:#536174">check chat owner</text>
+<path d="M640 435H780" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+<rect x="780" y="390" width="220" height="90" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="890.0" y="443.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Context assembly</text>
+<rect x="1180" y="390" width="220" height="90" fill="#edf4fc" stroke="#285a94" stroke-width="2"/>
+<text x="1290.0" y="443.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#285a94">LangGraph agent</text>
+<path d="M1660 392 A130.0 12 0 0 1 1920 392 V478 A130.0 12 0 0 1 1660 478 Z" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<ellipse cx="1790.0" cy="392" rx="130.0" ry="12" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="1790.0" y="443.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">BigQuery</text>
+<rect x="1180" y="110" width="220" height="100" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="1290.0" y="148" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">AI Gateway</text>
+<text x="1290.0" y="176" font-size="17" font-weight="400" text-anchor="middle" style="fill:#536174">Gemini + other models</text>
+<rect x="760" y="110" width="260" height="90" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="890.0" y="148" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Cloud Tasks</text>
+<text x="890.0" y="176" font-size="17" font-weight="400" text-anchor="middle" style="fill:#536174">Queued after turn saved</text>
+<rect x="760" y="300" width="260" height="60" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="890" y="337" font-size="20" font-weight="700" text-anchor="middle" style="fill:#202d3d">Conversation summary</text>
+<rect x="1180" y="620" width="220" height="100" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="1290.0" y="658" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Context retrieval</text>
+<text x="1290.0" y="686" font-size="17" font-weight="400" text-anchor="middle" style="fill:#536174">Keyword + vector search</text>
+<rect x="1660" y="620" width="260" height="100" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="1790.0" y="678.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Gemini Embeddings</text>
+<rect x="1660" y="505" width="260" height="90" fill="white" stroke="#64748b" stroke-width="1.4" stroke-dasharray="2 6"/>
+<text x="1790.0" y="543.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Future tools</text>
+<text x="1790.0" y="572.0" font-size="16" font-weight="400" text-anchor="middle" style="fill:#536174">Charts · email · web search</text>
+<path d="M1400 470H1480V550H1660" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" stroke-dasharray="2 6" stroke-linecap="round"/>
+<text x="1570" y="540" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">Action + inputs →</text>
+<path d="M400 937 A560.0 12 0 0 1 1520 937 V1083 A560.0 12 0 0 1 400 1083 Z" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<ellipse cx="960.0" cy="937" rx="560.0" ry="12" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="960.0" y="975" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Cloud SQL · PostgreSQL</text>
+<text x="960.0" y="1013" font-size="18" font-weight="400" text-anchor="middle" style="fill:#536174">app: users · conversations · reports · settings · memory · feedback · checkpoints</text>
+<text x="960.0" y="1042" font-size="18" font-weight="400" text-anchor="middle" style="fill:#536174">knowledge: Golden examples</text>
+<text x="320" y="1210" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">LangSmith</text>
+<text x="320" y="1252" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Cloud Monitoring</text>
+<text x="320" y="1294" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Cloud Logging</text>
+<text x="320" y="1336" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Secret Manager</text>
+<rect x="830" y="1190" width="260" height="90" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="960.0" y="1243.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Cloud Storage</text>
+<rect x="1160" y="1190" width="240" height="90" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="1280.0" y="1243.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Eventarc</text>
+<rect x="1650" y="1210" width="250" height="100" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="1775.0" y="1268.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Cloud Run worker</text>
+<path d="M530 520V610" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="550" y="555" font-size="15" font-weight="400" text-anchor="start" style="fill:#536174">Authenticated feedback ↓</text>
+<rect x="420" y="610" width="240" height="100" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="540.0" y="668.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Feedback intake</text>
+<rect x="40" y="540" width="310" height="570" fill="#f8fafc" stroke="#a3afbd" stroke-width="1.4" stroke-dasharray="6 5"/>
+<text x="65" y="570" font-size="16" font-weight="700" text-anchor="start" style="fill:#536174">EVALUATION</text>
+<rect x="60" y="595" width="270" height="80" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="195.0" y="626.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Feedback store</text>
+<text x="195.0" y="653.0" font-size="18" font-weight="400" text-anchor="middle" style="fill:#536174">app.feedback · Cloud SQL</text>
+<path d="M420 635H330" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)"/>
+<text x="375" y="615" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">Feedback ←</text>
+<path d="M195 675V715" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="215" y="702" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">Weekly review ↓</text>
+<rect x="60" y="715" width="270" height="80" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="195.0" y="763.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Approved cases</text>
+<path d="M195 795V835" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="215" y="822" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">New cases ↓</text>
+<path d="M60 847 A135.0 12 0 0 1 330 847 V943 A135.0 12 0 0 1 60 943 Z" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<ellipse cx="195.0" cy="847" rx="135.0" ry="12" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="195.0" y="903.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">LangSmith evals</text>
+<path d="M195 955V990" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#arrow)" stroke-dasharray="6 5"/>
+<text x="215" y="978" font-size="14" font-weight="400" text-anchor="start" style="fill:#536174">Versioned dataset ↓</text>
+<rect x="60" y="990" width="270" height="80" fill="white" stroke="#64748b" stroke-width="1.4"/>
+<text x="195.0" y="1038.0" font-size="22" font-weight="700" text-anchor="middle" style="fill:#202d3d">Eval runner</text>
+<text x="195" y="1094" font-size="14" font-weight="400" text-anchor="middle" style="fill:#536174">Scores → LangSmith → CI gate</text>
+<text x="40" y="1405" font-size="15" font-weight="400" text-anchor="start" style="fill:#536174">Solid: live data    Dashed: background / support    Dotted grey boundary: backend    Dotted links: future    Blue: agent</text>
+<circle cx="515" cy="322" r="12" fill="#202d3d" stroke="white" stroke-width="2"/>
+<text x="515" y="327" font-size="14" font-weight="700" text-anchor="middle" style="fill:white">1</text>
+<circle cx="710" cy="440" r="12" fill="#202d3d" stroke="white" stroke-width="2"/>
+<text x="710" y="445" font-size="14" font-weight="700" text-anchor="middle" style="fill:white">2</text>
+<circle cx="1198" cy="404" r="12" fill="#202d3d" stroke="white" stroke-width="2"/>
+<text x="1198" y="409" font-size="14" font-weight="700" text-anchor="middle" style="fill:white">3</text>
+<circle cx="1290" cy="600" r="12" fill="#202d3d" stroke="white" stroke-width="2"/>
+<text x="1290" y="605" font-size="14" font-weight="700" text-anchor="middle" style="fill:white">4</text>
+<circle cx="1530" cy="436" r="12" fill="#202d3d" stroke="white" stroke-width="2"/>
+<text x="1530" y="441" font-size="14" font-weight="700" text-anchor="middle" style="fill:white">5</text>
+<circle cx="1290" cy="330" r="12" fill="#202d3d" stroke="white" stroke-width="2"/>
+<text x="1290" y="335" font-size="14" font-weight="700" text-anchor="middle" style="fill:white">6</text>
+</g></svg>

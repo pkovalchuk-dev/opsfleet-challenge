@@ -1,0 +1,11 @@
+# Direct dependencies. Pin with:
+#   uv pip compile --python-version 3.13 --generate-hashes --output-file requirements.txt requirements.in
+google-cloud-bigquery[pandas]
+langgraph
+langchain-google-genai
+langsmith>=0.14.17
+sqlglot
+pyyaml
+rich
+prompt-toolkit
+python-dotenv
